@@ -133,7 +133,7 @@ def fetch_feed(feed_info: dict) -> list:
                 created_at = hit.get("created_at") or datetime.now(timezone.utc).isoformat()
                 author = hit.get("author", "hn")
                 points = hit.get("points") or 0
-                summary = f"Hacker News discussion ({points} points, by {author})"
+                summary = f"Обговорення на Hacker News ({points} балів, автор: {author})"
                 if not title:
                     continue
                 is_imp = check_is_important(title, summary)

@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Monitor — Свежие новости искусственного интеллекта</title>
-  <meta name="description" content="Быстрый мониторинг свежих новостей об искусственном интеллекте в реальном времени из ключевых источников.">
+  <title>AI Monitor — Свіжі новини штучного інтелекту</title>
+  <meta name="description" content="Швидкий моніторинг свіжих новин про штучний інтелект у реальному часі з ключових джерел.">
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 </head>
 <body>
-  <!-- Фоновые градиенты -->
+  <!-- Фонові градієнти -->
   <div class="bg-glow bg-glow-1"></div>
   <div class="bg-glow bg-glow-2"></div>
 
-  <!-- Всплывающие уведомления -->
+  <!-- Спливаючі сповіщення -->
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 
-  <!-- Шапка приложения -->
+  <!-- Шапка застосунку -->
   <header class="app-header">
     <div class="header-container">
       <div class="brand">
@@ -28,58 +28,58 @@
         </div>
         <div class="brand-text">
           <h1>AI Monitor</h1>
-          <p class="tagline">Радар ключевых событий в сфере ИИ</p>
+          <p class="tagline">Радар ключових подій у сфері ШІ</p>
         </div>
       </div>
 
       <div class="header-meta">
         <div class="status-card">
-          <span class="meta-label">Последнее обновление</span>
-          <span id="lastUpdated" class="meta-value">Загрузка...</span>
+          <span class="meta-label">Останнє оновлення</span>
+          <span id="lastUpdated" class="meta-value">Завантаження...</span>
         </div>
 
         <div class="status-card">
-          <span class="meta-label">Всего новостей</span>
+          <span class="meta-label">Всього новин</span>
           <span id="newsCount" class="meta-value count-badge">0</span>
         </div>
 
-        <button id="refreshBtn" class="refresh-btn" title="Сбросить список и загрузить свежие RSS">
+        <button id="refreshBtn" class="refresh-btn" title="Скинути список та завантажити свіжі RSS">
           <svg id="refreshIcon" class="refresh-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
           </svg>
-          <span id="refreshBtnText">Обновить сейчас</span>
+          <span id="refreshBtnText">Оновити зараз</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Панель управления и фильтров -->
+  <!-- Панель керування та фільтрів -->
   <section class="controls-section">
     <div class="controls-container">
-      <!-- Строка поиска и переключатель "Важное" -->
+      <!-- Рядок пошуку та перемикач "Важливе" -->
       <div class="search-row">
         <div class="search-box">
           <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="searchInput" placeholder="Поиск по заголовкам, моделям или темам..." autocomplete="off">
-          <button id="clearSearchBtn" class="clear-search-btn" title="Очистить поиск" style="display: none;">&times;</button>
+          <input type="text" id="searchInput" placeholder="Пошук за заголовками, моделями чи темами..." autocomplete="off">
+          <button id="clearSearchBtn" class="clear-search-btn" title="Очистити пошук" style="display: none;">&times;</button>
         </div>
 
-        <button id="importantToggle" class="important-toggle" title="Показывать только новости с релизами и ключевыми моделями">
+        <button id="importantToggle" class="important-toggle" title="Показувати тільки новини з релізами та ключовими моделями">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
-          <span>Только важное</span>
+          <span>Лише важливе</span>
         </button>
       </div>
 
-      <!-- Фильтры по источникам -->
+      <!-- Фільтри за джерелами -->
       <div class="sources-nav">
-        <span class="sources-label">Источники:</span>
+        <span class="sources-label">Джерела:</span>
         <div id="sourceFilters" class="source-pills">
-          <button class="pill active" data-source="all">Все</button>
+          <button class="pill active" data-source="all">Усі</button>
           <button class="pill" data-source="OpenAI">OpenAI</button>
           <button class="pill" data-source="TechCrunch">TechCrunch</button>
           <button class="pill" data-source="The Verge">The Verge</button>
@@ -91,27 +91,27 @@
     </div>
   </section>
 
-  <!-- Информационная полоса перед списком -->
+  <!-- Інформаційна смуга перед списком -->
   <div class="filter-status-bar">
     <div class="container status-bar-content">
-      <span id="filteredCountText">Показано новостей: 0</span>
-      <button id="resetFiltersBtn" class="reset-link" style="display: none;">Сбросить фильтры</button>
+      <span id="filteredCountText">Показано новин: 0</span>
+      <button id="resetFiltersBtn" class="reset-link" style="display: none;">Скинути фільтри</button>
     </div>
   </div>
 
-  <!-- Сетка новостей -->
+  <!-- Сітка новин -->
   <main class="news-section">
     <div class="container">
       <div id="newsGrid" class="news-grid">
-        <!-- Карточки рендерятся через JavaScript -->
+        <!-- Картки рендеряться через JavaScript -->
       </div>
 
-      <!-- Пустое состояние (когда ничего не найдено) -->
+      <!-- Порожній стан (коли нічого не знайдено) -->
       <div id="emptyState" class="empty-state" style="display: none;">
         <div class="empty-icon">🔍</div>
-        <h3>Новостей по данному запросу не найдено</h3>
-        <p>Попробуйте изменить поисковую фразу или сбросить активные фильтры источников.</p>
-        <button id="emptyResetBtn" class="btn-secondary">Показать все новости</button>
+        <h3>Новин за цим запитом не знайдено</h3>
+        <p>Спробуйте змінити пошукову фразу або скинути активні фільтри джерел.</p>
+        <button id="emptyResetBtn" class="btn-secondary">Показати всі новини</button>
       </div>
     </div>
   </main>
@@ -119,11 +119,11 @@
   <!-- Футер -->
   <footer class="app-footer">
     <div class="container footer-content">
-      <p>AI Monitor &copy; 2026. Мониторинг открытых RSS-лент без внешних ключей и баз данных.</p>
+      <p>AI Monitor &copy; 2026. Моніторинг відкритих RSS-стрічок без зовнішніх ключів та баз даних.</p>
       <div class="footer-links">
-        <a href="https://github.com/sportsite7-ctrl/AI-monitor" target="_blank" rel="noopener noreferrer">Репозиторий проекта на GitHub</a>
+        <a href="https://github.com/sportsite7-ctrl/AI-monitor" target="_blank" rel="noopener noreferrer">Репозиторій проєкту на GitHub</a>
         <span class="separator">&bull;</span>
-        <span class="footer-hint">Автообновление через GitHub Actions раз в 3 часа</span>
+        <span class="footer-hint">Автооновлення через GitHub Actions кожні 3 години</span>
       </div>
     </div>
   </footer>

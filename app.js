@@ -1,10 +1,10 @@
 /**
- * AI Monitor - Core Client Logic
- * Handles feed fetching (instant news.json & real-time RSS via proxy),
- * client-side search, multi-source filtering, and responsive UI updates.
+ * AI Monitor - Core Client Logic (Українська локалізація)
+ * Керує завантаженням стрічок (миттєвий news.json та оновлення RSS через проксі),
+ * клієнтським пошуком, фільтрацією за джерелами та оновленням інтерфейсу.
  */
 
-// State Management
+// Керування станом
 let allArticles = [];
 let currentFilter = {
   source: 'all',
@@ -13,10 +13,10 @@ let currentFilter = {
 };
 let isRefreshing = false;
 
-// Important keywords for tagging high-impact AI news
+// Ключові слова для виявлення важливих подій та релізів у сфері ШІ
 const IMPORTANT_REGEX = /\b(gpt|claude|gemini|release|open-source|opensource|model|models|breakthrough|deepseek|o1|o3|reasoning|agent|agents|llama|mistral|weights|benchmark)\b/i;
 
-// RSS Feeds configuration for browser-side real-time refreshing
+// Конфігурація RSS-джерел для оновлення у браузері
 const RSS_SOURCES = [
   {
     name: 'OpenAI',
@@ -50,7 +50,7 @@ const RSS_SOURCES = [
   }
 ];
 
-// DOM Elements
+// Елементи DOM
 const newsGrid = document.getElementById('newsGrid');
 const emptyState = document.getElementById('emptyState');
 const refreshBtn = document.getElementById('refreshBtn');
@@ -68,7 +68,7 @@ const emptyResetBtn = document.getElementById('emptyResetBtn');
 const toastContainer = document.getElementById('toastContainer');
 
 // ==========================================================================
-// Initialization
+// Ініціалізація
 // ==========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -77,12 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
-  // Refresh button
+  // Кнопка оновлення
   refreshBtn.addEventListener('click', () => {
     if (!isRefreshing) refreshLiveRSS();
   });
 
-  // Search input
+  // Поле пошуку
   searchInput.addEventListener('input', (e) => {
     currentFilter.searchQuery = e.target.value.trim().toLowerCase();
     clearSearchBtn.style.display = currentFilter.searchQuery ? 'block' : 'none';
@@ -97,14 +97,14 @@ function setupEventListeners() {
     applyFilters();
   });
 
-  // Important toggle
+  // Перемикач "Важливе"
   importantToggle.addEventListener('click', () => {
     currentFilter.onlyImportant = !currentFilter.onlyImportant;
     importantToggle.classList.toggle('active', currentFilter.onlyImportant);
     applyFilters();
   });
 
-  // Source pills
+  // Фільтри за джерелами
   sourcePillsContainer.addEventListener('click', (e) => {
     const pill = e.target.closest('.pill');
     if (!pill) return;
@@ -116,7 +116,7 @@ function setupEventListeners() {
     applyFilters();
   });
 
-  // Reset filter buttons
+  // Скидання фільтрів
   resetFiltersBtn.addEventListener('click', resetAllFilters);
   emptyResetBtn.addEventListener('click', resetAllFilters);
 }
@@ -138,11 +138,11 @@ function resetAllFilters() {
 }
 
 // ==========================================================================
-// Feed Loading (Instant static -> Interactive live RSS)
+// Завантаження новин
 // ==========================================================================
 
 /**
- * Loads cached news.json immediately for instant rendering without white screen
+ * Миттєво завантажує локальний news.json для відсутності затримок
  */
 async function loadInitialNews() {
   try {
@@ -155,23 +155,21 @@ async function loadInitialNews() {
       updateHeaderStats(data.last_updated || new Date().toISOString());
       applyFilters();
     } else {
-      // If news.json is empty for some reason, trigger live fetch
       refreshLiveRSS();
     }
   } catch (err) {
-    console.warn('Initial static feed load failed, falling back to live RSS:', err);
+    console.warn('Локальний news.json недоступний, перехід до RSS:', err);
     refreshLiveRSS();
   }
 }
 
 /**
- * Fully resets list and fetches real-time updates directly from RSS sources
+ * Повністю скидає список і робить свіжий запит до відкритих RSS-стрічок
  */
 async function refreshLiveRSS() {
   if (isRefreshing) return;
   setRefreshingState(true);
 
-  // Render skeleton loading cards
   renderSkeletons(6);
 
   const fetchPromises = RSS_SOURCES.map(source => fetchSourceNews(source));
@@ -192,7 +190,6 @@ async function refreshLiveRSS() {
   });
 
   if (newArticles.length > 0) {
-    // Deduplicate by link
     const seen = new Set();
     const deduplicated = [];
     for (const art of newArticles) {
@@ -203,32 +200,29 @@ async function refreshLiveRSS() {
       }
     }
 
-    // Sort descending by date
     deduplicated.sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime());
 
     allArticles = deduplicated;
     updateHeaderStats(new Date().toISOString());
     applyFilters();
 
-    showToast(`Загружено ${deduplicated.length} свежих новостей из ${successfulSourcesCount} источников`, 'success');
+    showToast(`Завантажено ${deduplicated.length} свіжих новин із ${successfulSourcesCount} джерел`, 'success');
   } else {
-    // Total failure: keep existing articles or notify
     applyFilters();
-    showToast('Не удалось загрузить новости из RSS. Показаны сохранённые данные.', 'warning');
+    showToast('Не вдалося завантажити новини з RSS. Показано збережені дані.', 'warning');
   }
 
   if (failedSources.length > 0 && newArticles.length > 0) {
-    showToast(`Источник ${failedSources.join(', ')} временно недоступен`, 'info');
+    showToast(`Джерело ${failedSources.join(', ')} тимчасово недоступне`, 'info');
   }
 
   setRefreshingState(false);
 }
 
 /**
- * Fetch a single source using appropriate CORS/proxy strategy
+ * Завантажує одне джерело через прямий CORS або публічний проксі
  */
 async function fetchSourceNews(source) {
-  // Strategy 1: Hacker News Algolia direct API (native CORS support)
   if (source.type === 'hn_direct') {
     const res = await fetch(source.url, { headers: { 'Accept': 'application/json' } });
     if (!res.ok) throw new Error('HN API ' + res.status);
@@ -236,7 +230,7 @@ async function fetchSourceNews(source) {
     return (data.hits || []).map(hit => {
       const title = stripHtml(hit.title || '');
       const link = hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`;
-      const summary = `Обсуждение на Hacker News (${hit.points || 0} баллов, автор: ${hit.author || 'hn'})`;
+      const summary = `Обговорення на Hacker News (${hit.points || 0} балів, автор: ${hit.author || 'hn'})`;
       return {
         title,
         link,
@@ -248,7 +242,6 @@ async function fetchSourceNews(source) {
     }).filter(item => item.title && item.link);
   }
 
-  // Strategy 2: RSS-to-JSON public proxy
   const rss2jsonUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.url)}`;
   try {
     const res = await fetch(rss2jsonUrl);
@@ -271,10 +264,9 @@ async function fetchSourceNews(source) {
       }
     }
   } catch (err) {
-    console.warn(`rss2json failed for ${source.name}, trying allorigins fallback:`, err);
+    console.warn(`Помилка rss2json для ${source.name}, спроба allorigins:`, err);
   }
 
-  // Strategy 3: Fallback via AllOrigins raw proxy + in-browser DOMParser
   try {
     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(source.url)}`;
     const res = await fetch(proxyUrl);
@@ -282,20 +274,19 @@ async function fetchSourceNews(source) {
     const xmlText = await res.text();
     return parseXmlFeed(xmlText, source.name);
   } catch (err) {
-    console.error(`All strategies failed for source ${source.name}:`, err);
+    console.error(`Усі стратегії завершилися помилкою для ${source.name}:`, err);
     throw err;
   }
 }
 
 /**
- * Fallback browser XML parser for RSS 2.0 and Atom feeds
+ * Резервний XML-парсер у браузері для RSS 2.0 та Atom
  */
 function parseXmlFeed(xmlString, sourceName) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xmlString, 'text/xml');
   const items = [];
 
-  // Parse RSS 2.0 <item>
   const rssItems = doc.querySelectorAll('item');
   if (rssItems.length > 0) {
     rssItems.forEach(item => {
@@ -318,7 +309,6 @@ function parseXmlFeed(xmlString, sourceName) {
     return items;
   }
 
-  // Parse Atom <entry>
   const atomEntries = doc.querySelectorAll('entry');
   atomEntries.forEach(entry => {
     const title = stripHtml(entry.querySelector('title')?.textContent || '');
@@ -343,20 +333,16 @@ function parseXmlFeed(xmlString, sourceName) {
 }
 
 // ==========================================================================
-// Filtering & Rendering
+// Фільтрація та рендеринг
 // ==========================================================================
 
 function applyFilters() {
   const { source, searchQuery, onlyImportant } = currentFilter;
 
   const filtered = allArticles.filter(art => {
-    // 1. Source filter
     if (source !== 'all' && art.source !== source) return false;
-
-    // 2. Important filter
     if (onlyImportant && !art.is_important) return false;
 
-    // 3. Search query filter
     if (searchQuery) {
       const titleMatch = (art.title || '').toLowerCase().includes(searchQuery);
       const summaryMatch = (art.summary || '').toLowerCase().includes(searchQuery);
@@ -366,8 +352,7 @@ function applyFilters() {
     return true;
   });
 
-  // Update counts
-  filteredCountText.textContent = `Показано новостей: ${filtered.length} из ${allArticles.length}`;
+  filteredCountText.textContent = `Показано новин: ${filtered.length} із ${allArticles.length}`;
   const isFiltered = source !== 'all' || onlyImportant || Boolean(searchQuery);
   resetFiltersBtn.style.display = isFiltered ? 'inline-block' : 'none';
 
@@ -386,7 +371,7 @@ function renderCards(articles) {
   newsGrid.innerHTML = articles.map(article => {
     const cleanSourceClass = (article.source || '').replace(/[^a-zA-Z0-9]/g, '');
     const timeFormatted = formatRelativeTime(article.published);
-    const fullDate = article.published ? new Date(article.published).toLocaleString('ru-RU') : '';
+    const fullDate = article.published ? new Date(article.published).toLocaleString('uk-UA') : '';
 
     return `
       <article class="news-card">
@@ -401,7 +386,7 @@ function renderCards(articles) {
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                 </svg>
-                Важное
+                Важливе
               </span>
             ` : ''}
           </div>
@@ -413,7 +398,7 @@ function renderCards(articles) {
           </h2>
 
           <p class="card-summary">
-            ${escapeHtml(article.summary || 'Нет описания')}
+            ${escapeHtml(article.summary || 'Опис відсутній')}
           </p>
         </div>
 
@@ -427,7 +412,7 @@ function renderCards(articles) {
           </time>
 
           <a href="${escapeHtml(article.link)}" target="_blank" rel="noopener noreferrer" class="card-link">
-            Читать
+            Читати
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>
@@ -462,14 +447,14 @@ function renderSkeletons(count = 6) {
 }
 
 // ==========================================================================
-// UI Helpers & Formatters
+// Допоміжні функції та форматування
 // ==========================================================================
 
 function setRefreshingState(loading) {
   isRefreshing = loading;
   refreshBtn.disabled = loading;
   refreshIcon.classList.toggle('spinning', loading);
-  refreshBtnText.textContent = loading ? 'Загрузка RSS...' : 'Обновить сейчас';
+  refreshBtnText.textContent = loading ? 'Завантаження RSS...' : 'Оновити зараз';
 }
 
 function updateHeaderStats(dateString) {
@@ -481,34 +466,34 @@ function updateHeaderStats(dateString) {
   const diffMinutes = Math.floor((now - date) / (1000 * 60));
 
   if (diffMinutes < 1) {
-    lastUpdatedEl.textContent = 'Только что';
+    lastUpdatedEl.textContent = 'Щойно';
   } else if (diffMinutes < 60) {
-    lastUpdatedEl.textContent = `${diffMinutes} мин. назад`;
+    lastUpdatedEl.textContent = `${diffMinutes} хв. тому`;
   } else {
-    lastUpdatedEl.textContent = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    lastUpdatedEl.textContent = date.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
   }
 }
 
 function formatRelativeTime(dateString) {
-  if (!dateString) return 'Недавно';
+  if (!dateString) return 'Нещодавно';
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now - date;
 
-  if (isNaN(date.getTime()) || diffMs < 0) return 'Только что';
+  if (isNaN(date.getTime()) || diffMs < 0) return 'Щойно';
 
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
   const diffHours = Math.floor(diffMin / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  if (diffMin < 1) return 'Только что';
-  if (diffMin < 60) return `${diffMin} мин. назад`;
-  if (diffHours < 24) return `${diffHours} ч. назад`;
-  if (diffDays === 1) return `Вчера`;
-  if (diffDays < 7) return `${diffDays} дн. назад`;
+  if (diffMin < 1) return 'Щойно';
+  if (diffMin < 60) return `${diffMin} хв. тому`;
+  if (diffHours < 24) return `${diffHours} год. тому`;
+  if (diffDays === 1) return `Вчора`;
+  if (diffDays < 7) return `${diffDays} дн. тому`;
 
-  return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+  return date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' });
 }
 
 function checkIsImportant(title, summary) {
